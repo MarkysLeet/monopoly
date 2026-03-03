@@ -119,7 +119,7 @@ class Game {
 
   payJail(playerId) {
     if (this.currentPlayer.id !== playerId || !this.currentPlayer.inJail) return null;
-
+    
     if (this.currentPlayer.money >= 50) {
       this.currentPlayer.money -= 50;
       this.currentPlayer.inJail = false;
