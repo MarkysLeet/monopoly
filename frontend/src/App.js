@@ -2,18 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import Lobby from './components/Lobby';
 import GameRoom from './components/GameRoom';
-import socket from './socket';
+import './index.css';
+
+// Генерируем уникальный ID для игрока, чтобы идентифицировать его при перезагрузках
+const getOrCreatePlayerId = () => {
+  let id = localStorage.getItem('playerId');
+  if (!id) {
+    id = `user_${Math.random().toString(36).substring(2, 9)}`;
+    localStorage.setItem('playerId', id);
+  }
+  return id;
+};
 
 function App() {
-  const [playerName, setPlayerName] = useState('');
+  const [playerName, setPlayerName] = useState(localStorage.getItem('playerName') || '');
+  const [playerId] = useState(getOrCreatePlayerId());
+
+  useEffect(() => {
+    localStorage.setItem('playerName', playerName);
+  }, [playerName]);
 
   return (
     <Router>
-      <div className="App" style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+      <div className="App clay-bg">
         <Routes>
           <Route path="/" element={<Home setPlayerName={setPlayerName} playerName={playerName} />} />
-          <Route path="/lobby" element={<Lobby playerName={playerName} />} />
-          <Route path="/room/:roomId" element={<GameRoom playerName={playerName} />} />
+          <Route path="/lobby" element={<Lobby playerName={playerName} playerId={playerId} />} />
+          <Route path="/room/:roomId" element={<GameRoom playerName={playerName} playerId={playerId} />} />
         </Routes>
       </div>
     </Router>
@@ -31,23 +46,25 @@ function Home({ setPlayerName, playerName }) {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '100px auto', textAlign: 'center', border: '1px solid #ccc', padding: '30px', borderRadius: '8px' }}>
-      <h1>Монополия</h1>
-      <form onSubmit={handleJoin}>
-        <div style={{ marginBottom: '15px' }}>
-          <input
-            type="text"
-            placeholder="Введите ваш никнейм"
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            style={{ padding: '10px', width: '100%', boxSizing: 'border-box' }}
-            required
-          />
-        </div>
-        <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', width: '100%' }}>
-          Войти
-        </button>
-      </form>
+    <div className="home-container">
+      <div className="clay-card home-card">
+        <h1 className="title">Монополия</h1>
+        <form onSubmit={handleJoin}>
+          <div className="input-group">
+            <input
+              type="text"
+              placeholder="Введите ваш никнейм"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              className="clay-input"
+              required
+            />
+          </div>
+          <button type="submit" className="clay-btn primary-btn full-width">
+            Войти в игру
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

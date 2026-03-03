@@ -1,158 +1,76 @@
 import React from 'react';
+import '../index.css';
 
-function Board({ boardState, players }) {
-  // Классическая доска Монополии состоит из 40 клеток.
-  // 0-10: нижний ряд (справа налево)
-  // 10-20: левый ряд (снизу вверх)
-  // 20-30: верхний ряд (слева направо)
-  // 30-40: правый ряд (сверху вниз)
-
-  const bottomRow = boardState.slice(0, 11).reverse();
-  const leftRow = boardState.slice(11, 20).reverse();
-  const topRow = boardState.slice(20, 31);
-  const rightRow = boardState.slice(31, 40);
-
-  const renderCell = (cell) => {
-    // Ищем игроков на этой клетке
-    const playersHere = players.filter((p) => p.position === cell.id);
-
-    return (
-      <div
-        key={cell.id}
-        style={{
-          border: '1px solid #333',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '2px',
-          boxSizing: 'border-box',
-          position: 'relative',
-          backgroundColor: '#fff',
-          textAlign: 'center',
-          fontSize: '10px',
-        }}
-      >
-        {cell.color && (
-          <div
-            style={{
-              width: '100%',
-              height: '15px',
-              backgroundColor: cell.color,
-              borderBottom: '1px solid #333',
-            }}
-          />
-        )}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', padding: '2px' }}>
-          {cell.name}
-        </div>
-        {cell.price > 0 && <div style={{ fontSize: '9px', fontWeight: 'bold' }}>{cell.price}$</div>}
-
-        {/* Индикатор владельца */}
-        {cell.owner && (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '2px',
-              right: '2px',
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: players.find((p) => p.id === cell.owner)?.color || 'grey',
-            }}
-            title="Владелец"
-          />
-        )}
-
-        {/* Фишки игроков */}
-        <div style={{ display: 'flex', gap: '2px', position: 'absolute', top: '2px', left: '2px' }}>
-          {playersHere.map((p) => (
-            <div
-              key={p.id}
-              style={{
-                width: '10px',
-                height: '10px',
-                borderRadius: '50%',
-                backgroundColor: p.color,
-                border: '1px solid #000',
-              }}
-              title={p.name}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  // Создаем массивы клеток для каждой стороны
-  const topRowCells = boardState.slice(20, 31);
-  const rightColCells = boardState.slice(31, 40);
-  const bottomRowCells = boardState.slice(0, 11).reverse();
-  const leftColCells = boardState.slice(11, 20).reverse();
+const Board = ({ gameState, playerId }) => {
+  if (!gameState || !gameState.board) return null;
 
   return (
-    <div
-      style={{
-        width: '100%',
-        maxWidth: '85vh', // Ограничиваем максимальный размер, чтобы доска не обрезалась
-        aspectRatio: '1 / 1', // Квадратная доска
-        backgroundColor: '#cde6d0',
-        display: 'grid',
-        margin: '0 auto',
-        // 11 столбцов и 11 строк
-        gridTemplateColumns: 'repeat(11, 1fr)',
-        gridTemplateRows: 'repeat(11, 1fr)',
-        gap: '2px',
-        padding: '2px',
-        border: '2px solid #333',
-      }}
-    >
-      {/* Верхний ряд (от "Свободная стоянка" до "В тюрьму") */}
-      {topRowCells.map((cell) => (
-        <div key={cell.id} style={{ gridRow: '1', gridColumn: 'auto' }}>
-          {renderCell(cell)}
-        </div>
-      ))}
+    <div className="monopoly-board-wrapper">
+       <div className="monopoly-board">
+         {/* Центр поля */}
+         <div className="board-center clay-card flex-col center-content">
+            <h1 className="logo">МОНОПОЛИЯ</h1>
+            <div className="dice-display flex-row">
+               <div className="die">{gameState.currentDice[0]}</div>
+               <div className="die">{gameState.currentDice[1]}</div>
+            </div>
+            {gameState.state === 'game_over' && <h2 className="error mt-sm">Игра Окончена</h2>}
+         </div>
 
-      {/* Средняя часть: левый и правый столбцы */}
-      {leftColCells.map((cell, index) => {
-        const rightCell = rightColCells[index];
-        const gridRow = index + 2; // со 2 по 10 строку
-        return (
-          <React.Fragment key={cell.id}>
-            <div style={{ gridRow: gridRow, gridColumn: '1' }}>{renderCell(cell)}</div>
-            {index === 0 && (
-              <div
-                style={{
-                  gridRow: '2 / 11',
-                  gridColumn: '2 / 11',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '48px',
-                  color: '#333',
-                  opacity: 0.2,
-                  fontWeight: 'bold',
-                  fontFamily: 'sans-serif',
-                  transform: 'rotate(-45deg)',
-                }}
-              >
-                МОНОПОЛИЯ
+         {/* Клетки поля */}
+         {gameState.board.map((cell, index) => {
+            const playersOnCell = gameState.players.filter(p => p.position === index && !p.bankrupt);
+            const isOwner = cell.owner === playerId;
+            const ownerPlayer = gameState.players.find(p => p.id === cell.owner);
+
+            let cellClass = 'cell ';
+            if (index === 0 || index === 10 || index === 20 || index === 30) cellClass += 'corner ';
+            else if (index > 0 && index < 10) cellClass += 'bottom-row ';
+            else if (index > 10 && index < 20) cellClass += 'left-col ';
+            else if (index > 20 && index < 30) cellClass += 'top-row ';
+            else if (index > 30 && index < 40) cellClass += 'right-col ';
+
+            // Генерация индикаторов домов
+            let houses = [];
+            if (cell.houses > 0) {
+              if (cell.houses === 5) {
+                houses.push(<div key="hotel" className="hotel-indicator" title="Отель"></div>);
+              } else {
+                for (let i = 0; i < cell.houses; i++) {
+                  houses.push(<div key={i} className="house-indicator" title="Дом"></div>);
+                }
+              }
+            }
+
+            return (
+              <div key={index} className={`${cellClass} cell-${index}`}>
+                 {cell.color && (
+                    <div className="color-bar" style={{ backgroundColor: cell.color }}>
+                      {houses}
+                    </div>
+                 )}
+
+                 <div className="cell-content">
+                    <span className="cell-name">{cell.name}</span>
+                    {cell.price > 0 && <span className="cell-price">${cell.price}</span>}
+                    {cell.owner && ownerPlayer && (
+                       <span className="cell-owner" style={{ color: ownerPlayer.color }}>
+                          {isOwner ? '(Вы)' : ownerPlayer.name}
+                       </span>
+                    )}
+                 </div>
+
+                 <div className="players-on-cell">
+                    {playersOnCell.map((p, pIdx) => (
+                       <div key={pIdx} className="player-token" style={{ backgroundColor: p.color }} title={p.name}></div>
+                    ))}
+                 </div>
               </div>
-            )}
-            <div style={{ gridRow: gridRow, gridColumn: '11' }}>{renderCell(rightCell)}</div>
-          </React.Fragment>
-        );
-      })}
-
-      {/* Нижний ряд (от "Вперед" до "Тюрьма") */}
-      {bottomRowCells.map((cell) => (
-        <div key={cell.id} style={{ gridRow: '11', gridColumn: 'auto' }}>
-          {renderCell(cell)}
-        </div>
-      ))}
+            );
+         })}
+       </div>
     </div>
   );
-}
+};
 
 export default Board;
