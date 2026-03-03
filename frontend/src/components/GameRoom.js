@@ -93,14 +93,14 @@ function GameRoom({ playerName, playerId }) {
           <div className="board-section clay-card flex-grow">
              {gameState && <Board gameState={gameState} playerId={playerId} />}
           </div>
-
+          
           <div className="side-panel flex-col">
             <div className="clay-card logs-card">
               <h3>Игроки</h3>
               <ul className="players-stats list-unstyled">
                 {gameState?.players.map((p, i) => (
                    <li key={i} className={`player-stat ${i === gameState.turnIndex ? 'active-turn' : ''} ${p.bankrupt ? 'bankrupt' : ''}`}>
-                      <span className="dot" style={{ backgroundColor: p.color }}></span>
+                      <span className="dot" style={{ backgroundColor: p.color }}></span> 
                       <strong>{p.name}</strong> - ${p.money}
                       {p.bankrupt && <span className="badge error">Банкрот</span>}
                       {p.inJail && <span className="badge warning">В тюрьме</span>}
@@ -108,10 +108,10 @@ function GameRoom({ playerName, playerId }) {
                 ))}
               </ul>
             </div>
-
+            
             <div className="clay-card controls-card">
               <h3>Действия</h3>
-
+              
               {isMyTurn && gameState?.state === 'waiting_roll' && myPlayer?.inJail && myPlayer.jailTurns >= 3 && (
                  <button className="clay-btn danger-btn full-width mt-sm" onClick={handlePayJail}>Заплатить штраф $50</button>
               )}
@@ -128,7 +128,7 @@ function GameRoom({ playerName, playerId }) {
               {isMyTurn && gameState?.state === 'waiting_roll' && gameState?.currentDice[0] && !myPlayer?.inJail && (
                  <button className="clay-btn secondary-btn full-width mt-sm" onClick={handleEndTurn}>Завершить ход</button>
               )}
-
+              
               {!isMyTurn && <p className="text-muted center-text mt-sm">Ожидайте свой ход...</p>}
 
               {/* Trade button - available anytime it's my turn or I just wait */}
@@ -162,8 +162,8 @@ function GameRoom({ playerName, playerId }) {
                   {myProperties.map(prop => (
                     <div key={prop.id} className="flex-row-between mt-sm">
                       <span style={{ fontSize: '0.8rem' }}>{prop.name} (Домов: {prop.houses}/5)</span>
-                      <button
-                        className="clay-btn success-btn"
+                      <button 
+                        className="clay-btn success-btn" 
                         style={{ padding: '0.3rem 0.5rem', fontSize: '0.7rem' }}
                         disabled={prop.houses >= 5 || myPlayer.money < prop.houseCost || (!isMyTurn && gameState?.state !== 'waiting_roll')}
                         onClick={() => handleBuildHouse(prop.id)}
@@ -187,13 +187,13 @@ function GameRoom({ playerName, playerId }) {
           </div>
         </div>
       )}
-
+      
       {showTradeModal && gameState && (
-        <TradeModal
-          gameState={gameState}
-          playerId={playerId}
-          roomId={roomId}
-          onClose={() => setShowTradeModal(false)}
+        <TradeModal 
+          gameState={gameState} 
+          playerId={playerId} 
+          roomId={roomId} 
+          onClose={() => setShowTradeModal(false)} 
         />
       )}
     </div>

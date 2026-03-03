@@ -73,7 +73,7 @@ function TradeModal({ gameState, playerId, roomId, onClose }) {
                  </div>
               </div>
             </div>
-
+            
             <div className="flex-grow trade-side">
               <h4>Вы просите:</h4>
               <div className="flex-col gap-sm">

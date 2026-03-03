@@ -22,7 +22,7 @@ const Board = ({ gameState, playerId }) => {
             const playersOnCell = gameState.players.filter(p => p.position === index && !p.bankrupt);
             const isOwner = cell.owner === playerId;
             const ownerPlayer = gameState.players.find(p => p.id === cell.owner);
-
+            
             let cellClass = 'cell ';
             if (index === 0 || index === 10 || index === 20 || index === 30) cellClass += 'corner ';
             else if (index > 0 && index < 10) cellClass += 'bottom-row ';
@@ -49,7 +49,7 @@ const Board = ({ gameState, playerId }) => {
                       {houses}
                     </div>
                  )}
-
+                 
                  <div className="cell-content">
                     <span className="cell-name">{cell.name}</span>
                     {cell.price > 0 && <span className="cell-price">${cell.price}</span>}
@@ -59,7 +59,7 @@ const Board = ({ gameState, playerId }) => {
                        </span>
                     )}
                  </div>
-
+                 
                  <div className="players-on-cell">
                     {playersOnCell.map((p, pIdx) => (
                        <div key={pIdx} className="player-token" style={{ backgroundColor: p.color }} title={p.name}></div>

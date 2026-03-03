@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Хранилище комнат и игроков (в памяти). В Vercel это может сбрасываться при холодном старте,
+// Хранилище комнат и игроков (в памяти). В Vercel это может сбрасываться при холодном старте, 
 // но для небольших игровых сессий и частых запросов контейнер может жить долго.
 // В идеале нужен Redis/DB, но пока оставляем in-memory для простоты и скорости по ТЗ "без лишних интеграций"
 let rooms = global.rooms || {};
@@ -26,14 +26,14 @@ app.get('/api/rooms', (req, res) => {
 app.post('/api/rooms/create', (req, res) => {
   const { roomName, playerName, playerId } = req.body;
   if (!roomName || !playerName || !playerId) return res.status(400).json({ error: 'Missing data' });
-
+  
   const roomId = `room_${Math.random().toString(36).substring(2, 9)}`;
   rooms[roomId] = {
     id: roomId,
     name: roomName,
     players: [],
     maxPlayers: 4,
-    status: 'waiting',
+    status: 'waiting', 
     game: null,
     messages: []
   };
@@ -52,7 +52,7 @@ app.post('/api/rooms/join', (req, res) => {
   if (!room) return res.status(404).json({ error: 'Комната не найдена' });
   if (room.players.length >= room.maxPlayers) return res.status(400).json({ error: 'Комната заполнена' });
   if (room.status === 'playing') return res.status(400).json({ error: 'Игра уже идет' });
-
+  
   if (!room.players.find(p => p.id === playerId)) {
     room.players.push({ id: playerId, name: playerName });
     room.messages.push({ playerName: 'Система', text: `${playerName} присоединился к игре!`, time: new Date().toLocaleTimeString() });
@@ -113,11 +113,11 @@ app.post('/api/rooms/:roomId/action', (req, res) => {
         state = room.game.buildHouse(playerId, payload.propertyId);
       } else if (action === 'proposeTrade') {
         state = room.game.proposeTrade(
-            playerId,
-            payload.toPlayerId,
-            payload.offerProperties || [],
-            payload.requestProperties || [],
-            payload.offerMoney || 0,
+            playerId, 
+            payload.toPlayerId, 
+            payload.offerProperties || [], 
+            payload.requestProperties || [], 
+            payload.offerMoney || 0, 
             payload.requestMoney || 0
         );
       } else if (action === 'respondTrade') {
